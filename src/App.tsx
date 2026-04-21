@@ -909,7 +909,7 @@ const UserManagementView = () => {
         if (!contentType || !contentType.includes("application/json")) {
           const text = await response.text();
           console.error('Non-JSON response:', text);
-          throw new Error('Sistem sedang tidak tersedia atau sedang memproses ulang. Silakan coba lagi dalam 10 detik.');
+          throw new Error(`Sistem sedang tidak tersedia (${response.status}). Respon: ${text.substring(0, 50)}... Silakan coba lagi dalam 10 detik.`);
         }
 
         const result = await response.json();
@@ -986,7 +986,7 @@ const UserManagementView = () => {
         if (!contentType || !contentType.includes("application/json")) {
           const text = await response.text();
           console.error('Non-JSON response:', text);
-          throw new Error('Server tidak dapat memproses permintaan ini. Pastikan Service Role Key sudah terpasang.');
+          throw new Error(`Server bermasalah (${response.status}). Respon: ${text.substring(0, 50)}... Pastikan Service Role Key sudah terpasang.`);
         }
 
         const result = await response.json();
@@ -1701,6 +1701,21 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [appSettings, setAppSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [adminReady, setAdminReady] = useState<boolean | null>(null);
+
+  // Periksa satus admin saat startup
+  useEffect(() => {
+    fetch('/api/health')
+      .then(res => res.json())
+      .then(data => {
+        setAdminReady(data.adminReady);
+        console.log('Server Health Check:', data);
+      })
+      .catch(err => {
+        setAdminReady(false);
+        console.error('Server Health Check Failed:', err);
+      });
+  }, []);
 
   useEffect(() => {
     const loadSettings = async () => {

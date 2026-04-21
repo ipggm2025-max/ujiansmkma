@@ -17,8 +17,14 @@ async function startServer() {
   app.use(express.json());
 
   // Initialize Supabase Admin
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = (process.env.VITE_SUPABASE_URL || 'https://wycsvsaktfmjewihtscz.supabase.co').trim();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+  console.log('Supabase Admin Init Check:', {
+    urlFound: !!supabaseUrl,
+    serviceKeyFound: !!serviceRoleKey,
+    url: supabaseUrl
+  });
 
   const supabaseAdmin = (supabaseUrl && serviceRoleKey) 
     ? createClient(supabaseUrl, serviceRoleKey, {
@@ -141,7 +147,14 @@ async function startServer() {
 
   // Health check
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", adminReady: !!supabaseAdmin });
+    res.json({ 
+      status: "ok", 
+      adminReady: !!supabaseAdmin,
+      config: {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!serviceRoleKey
+      }
+    });
   });
 
   // Global Error Handler for API
@@ -151,6 +164,11 @@ async function startServer() {
       error: "Sistem mengalami gangguan teknis.",
       details: err.message 
     });
+  });
+
+  // Handle missing API routes with JSON
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
   });
 
   // Vite middleware for development
@@ -173,4 +191,6 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch(err => {
+  console.error("CRITICAL: Server failed to start:", err);
+});
