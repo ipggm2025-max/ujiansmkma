@@ -1,0 +1,6 @@
+{
+  "name": "SIM-UJIAN",
+  "description": "Sistem Informasi Manajemen Ujian untuk sekolah. Membantu pengelolaan soal, penjadwalan, dan penilaian otomatis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

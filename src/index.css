@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Courier New", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand: #0072FF;
+  --color-brand-medium: #0072FF;
+  --color-brand-light: #00C6FF;
+  --color-accent: #00C6FF;
+  --color-surface: #ffffff;
+  --color-surface-glass: rgba(255, 255, 255, 0.7);
+  --color-background: #F0F9FF;
+  --color-sidebar: #001e4d;
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+@utility glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-white/30 shadow-2xl;
+}
+
+@utility luxury-gradient {
+  background: linear-gradient(to right, #00C6FF, #0072FF);
+}
+
+@utility sidebar-gradient {
+  background: linear-gradient(180deg, #001e4d 0%, #000c20 100%);
+}
+
+@layer base {
+  body {
+    @apply luxury-gradient text-slate-900 font-sans antialiased min-h-screen;
+  }
+}
