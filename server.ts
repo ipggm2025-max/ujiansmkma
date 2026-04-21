@@ -144,6 +144,15 @@ async function startServer() {
     res.json({ status: "ok", adminReady: !!supabaseAdmin });
   });
 
+  // Global Error Handler for API
+  app.use("/api", (err: any, req: any, res: any, next: any) => {
+    console.error("API Error:", err);
+    res.status(500).json({ 
+      error: "Sistem mengalami gangguan teknis.",
+      details: err.message 
+    });
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

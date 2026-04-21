@@ -904,6 +904,14 @@ const UserManagementView = () => {
           body: JSON.stringify({ users: processedUsers })
         });
 
+        // Check if response is JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error('Sistem sedang tidak tersedia atau sedang memproses ulang. Silakan coba lagi dalam 10 detik.');
+        }
+
         const result = await response.json();
 
         if (response.ok) {
@@ -973,6 +981,14 @@ const UserManagementView = () => {
           method: 'DELETE',
         });
         
+        // Check if response is JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error('Server tidak dapat memproses permintaan ini. Pastikan Service Role Key sudah terpasang.');
+        }
+
         const result = await response.json();
         if (response.ok) {
           alert('User berhasil dihapus secara permanen.');
