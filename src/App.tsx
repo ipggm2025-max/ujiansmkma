@@ -3205,24 +3205,30 @@ export default function App() {
       if (error) throw error;
 
       if (data.user) {
-        // Ambil data profil dari tabel profiles untuk mendapatkan role asli
-        const { data: profileData } = await supabase
+        // SELALU lakukan Upsert profil saat login untuk memastikan ID valid di database
+        // Ini mencegah foreign key violation pada tabel exam_submissions
+        const { data: profileData, error: profileErr } = await supabase
           .from('profiles')
+          .upsert({
+            id: data.user.id,
+            email: data.user.email,
+            full_name: data.user.user_metadata?.full_name || userInput,
+            role: data.user.user_metadata?.role || 'siswa'
+          }, { onConflict: 'id' })
           .select('*, classes(name), majors(name)')
-          .eq('id', data.user.id)
           .single();
 
-        if (profileData) {
-          setProfile(profileData);
-          // Normalisasi role agar sesuai dengan tipe yang diharapkan frontend
-          const userRole = profileData.role === 'administrator' ? 'administrator' : 
-                           profileData.role === 'guru' ? 'guru' : 'siswa';
-          setRole(userRole as Role);
-        } else if (targetEmail === 'admin.simujian@gmail.com') {
-          setRole('administrator');
-        } else {
-          setRole('siswa');
+        if (profileErr) {
+          console.error('CRITICAL: Profile Synchronization Failed', profileErr);
         }
+
+        const finalProfile = profileData || { id: data.user.id, email: data.user.email, role: 'siswa' };
+        setProfile(finalProfile);
+        
+        // Normalisasi role agar sesuai dengan tipe yang diharapkan frontend
+        const userRole = finalProfile.role === 'administrator' ? 'administrator' : 
+                         finalProfile.role === 'guru' ? 'guru' : 'siswa';
+        setRole(userRole as Role);
         setIsLogged(true);
       }
     } catch (error: any) {
