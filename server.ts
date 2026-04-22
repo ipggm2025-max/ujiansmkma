@@ -124,6 +124,71 @@ async function startServer() {
     res.json(results);
   });
 
+  // API Route for Single User Registration
+  app.post("/api/admin/register", async (req, res) => {
+    if (!supabaseAdmin) {
+      return res.status(500).json({ 
+        error: "Supabase Admin client not initialized." 
+      });
+    }
+
+    const user = req.body;
+    if (!user.email || !user.full_name || !user.role) {
+      return res.status(400).json({ error: "Email, Full Name, and Role are required." });
+    }
+
+    try {
+      // 1. Create Auth User
+      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: user.email,
+        password: user.password || 'simujian2026',
+        email_confirm: true,
+        user_metadata: {
+          full_name: user.full_name,
+          role: user.role
+        }
+      });
+
+      if (authError) throw authError;
+
+      // 2. Update Profile with extra data
+      if (authUser.user) {
+        // Wait for trigger to create the initial profile row
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const { error: profileError } = await supabaseAdmin
+          .from('profiles')
+          .update({
+            full_name: user.full_name,
+            role: user.role,
+            nisn: user.nisn || null,
+            class_id: user.class_id || null,
+            major_id: user.major_id || null
+          })
+          .eq('id', authUser.user.id);
+
+        if (profileError) {
+          // If trigger failed or took too long, try upserting
+          const { error: upsertError } = await supabaseAdmin
+            .from('profiles')
+            .upsert({
+              id: authUser.user.id,
+              full_name: user.full_name,
+              role: user.role,
+              nisn: user.nisn || null,
+              class_id: user.class_id || null,
+              major_id: user.major_id || null
+            });
+          if (upsertError) throw upsertError;
+        }
+      }
+
+      res.json({ success: true, user: authUser.user });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // API Route for User Deletion
   app.delete("/api/admin/delete-user/:id", async (req, res) => {
     if (!supabaseAdmin) {
