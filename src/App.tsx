@@ -2789,7 +2789,7 @@ const ExamMonitorView = () => {
         .from('exam_submissions')
         .select(`
           *,
-          students (
+          profiles (
             full_name,
             nisn,
             classes (name)
@@ -2889,11 +2889,11 @@ const ExamMonitorView = () => {
               submissions.map((sub) => (
                 <tr key={sub.id} className="hover:bg-slate-50/30 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-black text-slate-800 text-sm">{sub.students?.full_name}</div>
-                    <div className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-widest">{sub.students?.nisn}</div>
+                    <div className="font-black text-slate-800 text-sm">{sub.profiles?.full_name}</div>
+                    <div className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-widest">{sub.profiles?.nisn}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[9px] font-black uppercase tracking-tight">{sub.students?.classes?.name}</span>
+                    <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[9px] font-black uppercase tracking-tight">{sub.profiles?.classes?.name}</span>
                   </td>
                   <td className="px-6 py-4 text-[11px] text-slate-500 font-medium">
                     {new Date(sub.started_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
